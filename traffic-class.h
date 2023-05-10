@@ -109,8 +109,14 @@ class TrafficClass : public Object {
         }
 
         bool match(Ptr<Packet> p) {
+
+            cout <<"INSIDE TRAFFICCLASS->MATCH; filters.size() = " << filters.size() << endl;
+
             for (size_t i = 0; i < filters.size(); i++) {
                 Filter* f = filters[i];
+                const type_info& type = typeid(f);
+
+                cout<< "Calling match for type " << type.name() << endl;
                 if (f->match(p)) {
                     return true;
                 }

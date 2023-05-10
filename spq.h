@@ -23,14 +23,14 @@ public:
     }
 
     void SetUp() {
-        int port = 1000;
+        int port = 1000; // TODO: config?
         for(size_t i=0; i < q_class.size(); i++) {
             vector<FilterElements*> filter_elements;
-            filter_elements.push_back (new Destination_Port_Number (port));
-            vector<Filter*> filter;
-            filter.push_back (new Filter());
-            filter[0]->set(filter_elements);
-            q_class[i]->SetFilters(filter);
+            filter_elements.push_back(new Destination_Port_Number(port));
+            vector<Filter*> filters;
+            filters.push_back (new Filter());
+            filters[i]->set(filter_elements);
+            q_class[i]->SetFilters(filters);
             port += 10000;
         }
     }
@@ -50,11 +50,16 @@ protected:
         UdpHeader udpHeader;
         copy->PeekHeader(udpHeader);
         uint32_t destPort = udpHeader.GetDestinationPort();
-        cout << "Destination Port: " << destPort << endl;
+        cout << "~~~Classify - Destination Port: " << destPort << endl;
 
         int index = GetDefaultIndex();
         for (size_t i = 0; i < q_class.size(); i++) {
+            cout<<"\tInside for loop for q_class = " << i << endl;
+
+
+
             if (q_class[i]->match(p)) {
+
                 return i;
             }
         }

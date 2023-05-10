@@ -6,7 +6,7 @@
 #include "ns3/queue.h"
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
-#include "qos/factory.h"
+#include "factory.h"
 
 // --------------------Default Network Topology-----------------------
 //

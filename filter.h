@@ -102,35 +102,29 @@ class Source_Port_Number : public FilterElements {
         }
 };
 
-// class Source_Mask : public FilterElements {
-//     private:
-//         Ipv4Mask value;
+class Source_Mask : public FilterElements {
+    private:
+        Ipv4Mask value;
+        Ipv4Address address;
+        Ipv4Mask mask;
 
-//     public:
-//         bool match (Ptr<Packet> p) {
-//             Ptr<Packet> copy = p->Copy();
+    public:
+    Source_Mask(ns3::Ipv4Address address, ns3::Ipv4Mask mask) {
+        this->address = address;
+        this->mask = mask;
+    }
 
-//             PppHeader pppHeader;
-//             copy->RemoveHeader(pppHeader);
+    bool match (Ptr<Packet> p) {
+        ns3::Ptr<ns3::Packet> copy = p->Copy();
+        ns3::PppHeader pppHeader;
+        copy->RemoveHeader(pppHeader);
+        ns3::Ipv4Header ipv4Header;
+        copy->RemoveHeader(ipv4Header);
 
-//             Ipv4Header ipv4Header;
-//             copy->RemoveHeader(ipv4Header);
-
-
-
-//             Ipv4Mask srcMask = ipv4Header.GetSourceMaskAddress();
-//             cout << "Source Mask: " << srcMask << endl;
-
-//             if (value == srcMask) {
-//                 return true;
-//             }
-//             return false;
-//         }
-
-//         void set (Ipv4Mask mask) {
-//             value = mask;
-//         }
-// };
+        return (ipv4Header.GetDestination().CombineMask(mask) == address.CombineMask(mask));
+    }
+            
+};
 
 class Destination_IP_Address : public FilterElements {
     private:
@@ -181,12 +175,12 @@ class Destination_Port_Number : public FilterElements {
             UdpHeader udpHeader;
             copy->PeekHeader(udpHeader);
             uint32_t destPort = udpHeader.GetDestinationPort();
-            cout << "Destination Port: " << destPort << endl;
+            cout << "Destination Port BANANA: " << destPort << endl;
 
-            if (value == destPort) {
-                return true;
-            }
-            return false;
+            cout << "Boolean value is " << ((value == destPort) ? "true" : "false") << endl;
+
+            return value == destPort;
+        
         }
 
         void set (uint16_t port) {
@@ -194,33 +188,28 @@ class Destination_Port_Number : public FilterElements {
         }
 };
 
-// class Destination_Mask : public FilterElements {
-//     private:
-//         Ipv4Mask value;
+class Destination_Mask : public FilterElements {
+    private:
+        Ipv4Mask value;
+        Ipv4Address address;
+        Ipv4Mask mask;
 
-//     public:
-//         bool match (Ptr<Packet> p) {
-//             Ptr<Packet> copy = p->Copy();
+    public:
+    Destination_Mask(ns3::Ipv4Address address, ns3::Ipv4Mask mask) {
+        this->address = address;
+        this->mask = mask;
+    }
 
-//             PppHeader pppHeader;
-//             copy->RemoveHeader(pppHeader);
+    bool match (Ptr<Packet> p) {
+        ns3::Ptr<ns3::Packet> copy = p->Copy();
+        ns3::PppHeader pppHeader;
+        copy->RemoveHeader(pppHeader);
+        ns3::Ipv4Header ipv4Header;
+        copy->RemoveHeader(ipv4Header);
 
-//             Ipv4Header ipv4Header;
-//             copy->RemoveHeader(ipv4Header);
-
-//             Ipv4Mask destMask = ipv4Header.GetDestinationMask();
-//             cout << "Destination Mask: " << destMask << endl;
-
-//             if (value == destMask) {
-//                 return true;
-//             }
-//             return false;
-//         }
-
-//         void set (Ipv4Mask mask)  {
-//             value = mask;
-//         }
-// };
+        return (ipv4Header.GetDestination().CombineMask(mask) == address.CombineMask(mask));
+    }
+};
 
 class Protocol_Number : public FilterElements {
     private:

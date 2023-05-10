@@ -87,6 +87,10 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
     protected:
         vector<TrafficClass*> q_class;
 
+        vector<TrafficClass*> get_q_class() {
+            return q_class;
+        }
+
         bool DoEnqueue(Ptr<Packet> item) {
             uint32_t queue_number = classify(item);
             // check if the queue number is in the index range of q_class
