@@ -61,7 +61,7 @@ protected:
     }
 
     // --------Schedule---------
-    Ptr<Packet> schedule() override {
+    Ptr<const Packet> schedule() override {
         int highest_priority_index = GetHighestPriorityAvailableIndex();
         if (highest_priority_index == -1) {
             cout << "Schedule - all queues are empty" << endl;

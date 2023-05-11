@@ -37,7 +37,7 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
         }
 
         Ptr<const Packet> Peek() const override {
-            return nullptr;
+            return DoPeek();
         }
 
         Ptr<Packet> Dequeue() override {
@@ -112,7 +112,25 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
         }
 
         Ptr<Packet> DoDequeue() {
-            Ptr<Packet> p = schedule();
+            cout << "---DoDequeue" << endl;
+            Ptr<const Packet> p = schedule();
+            cout << "DoDequeue - schedule result: " << p << endl;
+            //const_cast<Packet*>(p.Get());
+            if (p == nullptr) {
+                cout << "DoDequeue - schedule result is null" << endl;
+                return nullptr;
+            } else {
+                Ptr<Packet> p2 = p->Copy();
+                return p2;
+            }
+        }
+
+        // doPeek() is called by Peek() and Dequeue()
+        Ptr<const Packet> DoPeek() const {
+            cout << "---DoPeek" << endl;
+            // Ptr<const Packet> p = schedule();
+            Ptr<const Packet> p = const_cast<DiffServ*>(this)->schedule();
+            // Ptr<Packet> p2 = p->Copy();
             return p;
         }
 
@@ -120,7 +138,8 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
             return 0;
         };
 
-        virtual Ptr<Packet> schedule() {
+        virtual Ptr<const Packet> schedule() {
+            cout << "---schedule" << endl;
             return nullptr;
         };
 
@@ -133,7 +152,7 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
             return -1;
         };
 
-        int GetHighestPriorityAvailableIndex() {
+        int GetHighestPriorityAvailableIndex() const {
             int highest_priority = 0;
             int highest_priority_index = -1;
             if (!q_class[0]->IsEmpty()) {
@@ -147,6 +166,15 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
             }
             return highest_priority_index;
         };
+
+        bool AreAllQueuesEmpty() const {
+            for (size_t i=0; i<q_class.size(); i++) {
+                if (!q_class[i]->IsEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }
 };
 
 #endif /* DIFF_SERV_H */

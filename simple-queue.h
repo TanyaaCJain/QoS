@@ -46,7 +46,7 @@ protected:
     }
 
     // --------Schedule---------
-    Ptr<Packet> schedule() override {
+    Ptr<const Packet> schedule()  override {
         if (q_class[0]->IsEmpty()) {
             cout << "Schedule - Q1 is empty" << endl;
             return nullptr;

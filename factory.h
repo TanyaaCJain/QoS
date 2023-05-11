@@ -31,6 +31,7 @@ void CreateDiffServ(string inputfile, Ptr<PointToPointNetDevice>& middleDevice) 
         Ptr<DRR> pointQueue = CreateObject<DRR>();
         middleDevice->SetQueue(pointQueue);
         pointQueue->readConfig(inputfile);
+        pointQueue->SetUp();
     } else {
         cerr << "Error: queue name " << queue_name << " is not supported" << endl;
     }

@@ -42,14 +42,12 @@ class TrafficClass : public Object {
         }
 
         Ptr<Packet> Dequeue() {
-            if (m_queue.empty()) {
-                return nullptr;
-            } else {
-                Ptr<Packet> p = m_queue.front();
+            Ptr<Packet> p = Peek();
+            if (p != nullptr) {
                 m_queue.pop();
                 packets--;
-                return p;
             }
+            return p;
         }
 
         void SetMaxPackets(uint32_t maxPackets) {
@@ -84,8 +82,12 @@ class TrafficClass : public Object {
             return weight;
         }
 
-        Ptr<Packet> GetHeadPacket() {
-            return m_queue.front();
+        Ptr<Packet> Peek() {
+            if (m_queue.empty()) {
+                return nullptr;
+            } else {
+                return m_queue.front();
+            }
         }
 
         bool GetIsDefault() {
