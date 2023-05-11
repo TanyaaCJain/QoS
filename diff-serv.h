@@ -37,7 +37,7 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
         }
 
         Ptr<const Packet> Peek() const override {
-            return nullptr; // TODO: ?
+            return nullptr;
         }
 
         Ptr<Packet> Dequeue() override {
@@ -106,7 +106,7 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
             // enqueue
             cout << "---Enqueue - packet belongs to Q" << queue_number << endl;
             bool val = q_class[queue_number]->Enqueue(item);
-            cout << "DoEnqueue - enqueue result: " << val << endl;
+            cout << "   DoEnqueue - enqueue result: " << val << endl;
             return val;
             // return true;
         }
@@ -117,12 +117,10 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
         }
 
         virtual uint32_t classify(Ptr<Packet> p) {
-            cout << "---classify" << endl;
             return 0;
         };
 
         virtual Ptr<Packet> schedule() {
-            cout << "---schedule" << endl;
             return nullptr;
         };
 
@@ -147,7 +145,6 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
                     highest_priority_index = i;
                 }
             }
-            cout << "---GetHighestPriorityAvailableIndex " << highest_priority_index << endl;
             return highest_priority_index;
         };
 };

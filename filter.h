@@ -59,7 +59,7 @@ class Source_IP_Address : public FilterElements {
             copy->RemoveHeader(ipv4Header);
 
             Ipv4Address srcIp = ipv4Header.GetSource();
-            cout << "Source IP: " << srcIp << endl;
+            cout << "Filter: Source_IP_Address, Source IP: " << srcIp << endl;
 
             if (value == srcIp) {
                 return true;
@@ -89,7 +89,7 @@ class Source_Port_Number : public FilterElements {
             UdpHeader udpHeader;
             copy->PeekHeader(udpHeader);
             uint32_t srcPort = udpHeader.GetSourcePort();
-            cout << "Source Port: " << srcPort << endl;
+            cout << "Filter:Source_Port_Number, Source Port: " << srcPort << endl;
 
             if (value == srcPort) {
                 return true;
@@ -141,7 +141,7 @@ class Destination_IP_Address : public FilterElements {
             copy->RemoveHeader(ipv4Header);
 
             Ipv4Address destIp = ipv4Header.GetDestination();
-            cout << "Destination IP: " << destIp << endl;
+            cout << "Filter: Destination_IP_Address, Destination IP: " << destIp << endl;
 
             if (value == destIp) {
                 return true;
@@ -175,9 +175,11 @@ class Destination_Port_Number : public FilterElements {
             UdpHeader udpHeader;
             copy->PeekHeader(udpHeader);
             uint32_t destPort = udpHeader.GetDestinationPort();
-            cout << "Destination Port BANANA: " << destPort << endl;
+            // cout << "Filter: Destination_Port_Number" << endl;
 
-            cout << "Boolean value is " << ((value == destPort) ? "true" : "false") << endl;
+            cout << "\t\tPacket's Destination Port: " << destPort << ", Object's Destination Port: " << value << endl;
+
+            cout << "\t\tBoolean value is " << ((value == destPort) ? "true" : "false") << endl;
 
             return value == destPort;
         
@@ -226,7 +228,7 @@ class Protocol_Number : public FilterElements {
             copy->RemoveHeader(ipv4Header);
 
             uint32_t protocol = ipv4Header.GetProtocol();
-            cout << "Protocol: " << protocol << endl;
+            cout << "Filter: Protocol Number, Protocol: " << protocol << endl;
 
             if (value == protocol) {
                 return true;

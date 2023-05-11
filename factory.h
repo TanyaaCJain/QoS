@@ -16,7 +16,7 @@ using namespace std;
 void CreateDiffServ(string inputfile, Ptr<PointToPointNetDevice>& middleDevice) {
     string queue_name = inputfile.substr(inputfile.find_last_of("/\\") + 1);
     queue_name = queue_name.substr(0, queue_name.find_last_of("."));
-    cout << "Queue name: " << queue_name << endl;
+    cout << "QoS: " << queue_name << endl;
     if (queue_name == "simple") {
         Ptr<SimpleQueue> pointQueue = CreateObject<SimpleQueue>();
         middleDevice->SetQueue(pointQueue);
@@ -25,6 +25,8 @@ void CreateDiffServ(string inputfile, Ptr<PointToPointNetDevice>& middleDevice) 
         Ptr<SPQ> pointQueue = CreateObject<SPQ>();
         middleDevice->SetQueue(pointQueue);
         pointQueue->readConfig(inputfile);
+        pointQueue->SetUp();
+        cout << "-------SetUp() DONE-------" << endl;
     } else if  (queue_name == "drr") {
         Ptr<DRR> pointQueue = CreateObject<DRR>();
         middleDevice->SetQueue(pointQueue);

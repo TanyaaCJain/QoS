@@ -10,9 +10,7 @@
 
 class SPQ : public DiffServ {
 public:
-    SPQ() {
-        SetUp();
-    }
+    SPQ() {};
     ~SPQ() {};
 
     static ns3::TypeId GetTypeId() {
@@ -23,13 +21,13 @@ public:
     }
 
     void SetUp() {
-        int port = 1000; // TODO: config?
+        int port = 10000;
         for(size_t i=0; i < q_class.size(); i++) {
             vector<FilterElements*> filter_elements;
             filter_elements.push_back(new Destination_Port_Number(port));
             vector<Filter*> filters;
             filters.push_back (new Filter());
-            filters[i]->set(filter_elements);
+            filters[0]->set(filter_elements);
             q_class[i]->SetFilters(filters);
             port += 10000;
         }
@@ -54,12 +52,8 @@ protected:
 
         int index = GetDefaultIndex();
         for (size_t i = 0; i < q_class.size(); i++) {
-            cout<<"\tInside for loop for q_class = " << i << endl;
-
-
-
+            cout<<"\tInside the for loop for q_class = " << i << endl;
             if (q_class[i]->match(p)) {
-
                 return i;
             }
         }
