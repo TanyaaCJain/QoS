@@ -29,7 +29,7 @@ public:
 
         next_queue_index = 0;
 
-        int port = 1000;
+        int port = 10000;
         for(size_t i=0; i < q_class.size(); i++) {
             vector<FilterElements*> filter_elements;
             filter_elements.push_back (new Destination_Port_Number (port));
@@ -73,10 +73,10 @@ protected:
             //     continue;
             // }
             // divide i by 3 and get the remainder
-            return i % 3;
-            // if (q_class[i]->match(p)) {
-            //     return i;
-            // }
+            // return i % 3;
+            if (q_class[i]->match(p)) {
+                return i;
+            }
         }
         return index;
     }

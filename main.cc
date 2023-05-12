@@ -7,12 +7,13 @@
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 #include "factory.h"
+#include "ns3/flow-monitor-helper.h"
 
 // --------------------Default Network Topology-----------------------
 //
 //       10.1.1.0           10.1.2.0
 // n0 -------------- n2 -------------- n1
-//     100Mbps, 20ms     10Mbps, 20ms
+//     40Mbps, 20ms      10Mbps, 20ms
 //
 // n0: UDP Echo Client
 // n1: UDP Echo Server
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     // -------------Create links and devices------------
     PointToPointHelper clientToRouter; // link between client and router
-    clientToRouter.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
+    clientToRouter.SetDeviceAttribute("DataRate", StringValue("40Mbps"));
     clientToRouter.SetChannelAttribute("Delay", StringValue("20ms"));
 
     PointToPointHelper routerToServer; // link between router and server
@@ -92,13 +93,21 @@ int main(int argc, char *argv[]) {
     // Set up the UdpEchoClient applications with different ports
     UdpEchoClientHelper echoClient1 (routerToServerInterfaces.GetAddress(1), 10000);
     echoClient1.SetAttribute ("MaxPackets", UintegerValue(10000));
-    echoClient1.SetAttribute ("Interval", TimeValue(Seconds(1.0)));
+    // echoClient1.SetAttribute ("Interval", TimeValue(Seconds(1.0)));
+    echoClient1.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
     echoClient1.SetAttribute ("PacketSize", UintegerValue(1024));
 
     UdpEchoClientHelper echoClient2 (routerToServerInterfaces.GetAddress(1), 20000);
     echoClient2.SetAttribute("MaxPackets", UintegerValue(10000));
-    echoClient2.SetAttribute("Interval", TimeValue(Seconds(1.0)));
+    // echoClient2.SetAttribute("Interval", TimeValue(Seconds(1.0)));
+    echoClient2.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
     echoClient2.SetAttribute("PacketSize", UintegerValue(1024));
+
+    UdpEchoClientHelper echoClient3 (routerToServerInterfaces.GetAddress(1), 30000);
+    echoClient3.SetAttribute("MaxPackets", UintegerValue(10000));
+    // echoClient3.SetAttribute("Interval", TimeValue(Seconds(1.0)));
+    echoClient3.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
+    echoClient3.SetAttribute("PacketSize", UintegerValue(1024));
 
     ApplicationContainer clientApps1 = echoClient1.Install(nodes.Get(0));
     clientApps1.Start(Seconds(2.0));
@@ -108,9 +117,25 @@ int main(int argc, char *argv[]) {
     clientApps2.Start(Seconds(2.0));
     clientApps2.Stop(Seconds(10.0));
 
+    ApplicationContainer clientApps3 = echoClient3.Install(nodes.Get(0));
+    clientApps3.Start(Seconds(2.0));
+    clientApps3.Stop(Seconds(10.0));
+
     // Enable generating the pcap files
-    clientToRouter.EnablePcapAll("client-router");
-    routerToServer.EnablePcapAll("router-server");
+    // clientToRouter.EnablePcapAll("client-router");
+    // routerToServer.EnablePcapAll("router-server");
+
+    AsciiTraceHelper ascii;
+
+
+    Ptr<PacketSink> sink;
+    sink = pcapHelper->CreateFileSink("capture.pcap", true);
+
+    clientToRouter.EnablePcap("csma-capture", devices.Get(0), true);
+
+    std::string fileName = "drr-";
+    clientToRouter.EnablePcapAll (fileName, false);
+    routerToServer.EnablePcapAll (fileName, false);
 
     Simulator::Run();
     Simulator::Destroy();
