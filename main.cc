@@ -88,17 +88,17 @@ int main(int argc, char *argv[]) {
 
     ApplicationContainer serverApps = echoServer.Install(nodes.Get(1)); // install server application on node 1
     serverApps.Start(Seconds(1.0));
-    serverApps.Stop(Seconds(10.0));
+    serverApps.Stop(Seconds(60.0));
 
     // Set up the UdpEchoClient applications with different ports
     UdpEchoClientHelper echoClient1 (routerToServerInterfaces.GetAddress(1), 10000);
-    echoClient1.SetAttribute ("MaxPackets", UintegerValue(10000));
+    echoClient1.SetAttribute ("MaxPackets", UintegerValue(120000));
     // echoClient1.SetAttribute ("Interval", TimeValue(Seconds(1.0)));
     echoClient1.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
     echoClient1.SetAttribute ("PacketSize", UintegerValue(1024));
 
     UdpEchoClientHelper echoClient2 (routerToServerInterfaces.GetAddress(1), 20000);
-    echoClient2.SetAttribute("MaxPackets", UintegerValue(10000));
+    echoClient2.SetAttribute("MaxPackets", UintegerValue(120000));
     // echoClient2.SetAttribute("Interval", TimeValue(Seconds(1.0)));
     echoClient2.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
     echoClient2.SetAttribute("PacketSize", UintegerValue(1024));
@@ -110,16 +110,16 @@ int main(int argc, char *argv[]) {
     echoClient3.SetAttribute("PacketSize", UintegerValue(1024));
 
     ApplicationContainer clientApps1 = echoClient1.Install(nodes.Get(0));
-    clientApps1.Start(Seconds(2.0));
-    clientApps1.Stop(Seconds(10.0));
+    clientApps1.Start(Seconds(5.0));
+    clientApps1.Stop(Seconds(50.0));
 
     ApplicationContainer clientApps2 = echoClient2.Install(nodes.Get(0));
-    clientApps2.Start(Seconds(2.0));
-    clientApps2.Stop(Seconds(10.0));
+    clientApps2.Start(Seconds(5.0));
+    clientApps2.Stop(Seconds(50.0));
 
     ApplicationContainer clientApps3 = echoClient3.Install(nodes.Get(0));
-    clientApps3.Start(Seconds(2.0));
-    clientApps3.Stop(Seconds(10.0));
+    clientApps3.Start(Seconds(5.0));
+    clientApps3.Stop(Seconds(50.0));
 
     // Enable generating the pcap files
     // clientToRouter.EnablePcapAll("client-router");
@@ -127,15 +127,17 @@ int main(int argc, char *argv[]) {
 
     AsciiTraceHelper ascii;
 
-
-    Ptr<PacketSink> sink;
-    sink = pcapHelper->CreateFileSink("capture.pcap", true);
-
-    clientToRouter.EnablePcap("csma-capture", devices.Get(0), true);
+    // std::string fileName = "drr-";
+    // clientToRouter.EnablePcapAll (fileName, false);
+    // routerToServer.EnablePcapAll (fileName, false);
 
     std::string fileName = "drr-";
-    clientToRouter.EnablePcapAll (fileName, false);
-    routerToServer.EnablePcapAll (fileName, false);
+    clientToRouter.EnablePcap ("cc-drr-1", clientToRouterDevices.Get(0));
+    routerToServer.EnablePcap ("cc-drr-2", routerToServerDevices.Get(1));
+
+    // std::string fileName = "spq-";
+    // clientToRouter.EnablePcap ("cc-spq-1", clientToRouterDevices.Get(0));
+    // routerToServer.EnablePcap ("cc-spq-2", routerToServerDevices.Get(1));
 
     Simulator::Run();
     Simulator::Destroy();

@@ -41,6 +41,7 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
         }
 
         Ptr<Packet> Dequeue() override {
+            cout << "---Dequeue" << endl;
             return DoDequeue();
         }
 
@@ -95,42 +96,36 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
             uint32_t queue_number = classify(item);
             // check if the queue number is in the index range of q_class
             if (queue_number >= q_class.size() || queue_number < 0) {
-                cout << "DoEnqueue - queue number is out of range" << endl;
+                // cout << "DoEnqueue - queue number is out of range" << endl;
                 return false;
             }
             // check if the queue is full
             if (q_class[queue_number]->IsFull()) {
-                cout << "DoEnqueue - queue is full" << endl;
+                // cout << "DoEnqueue - queue is full" << endl;
                 return false;
             }
             // enqueue
-            cout << "---Enqueue - packet belongs to Q" << queue_number << endl;
+            // cout << "---Enqueue - packet belongs to Q" << queue_number << endl;
             bool val = q_class[queue_number]->Enqueue(item);
-            cout << "   DoEnqueue - enqueue result: " << val << endl;
+            // cout << "   DoEnqueue - enqueue result: " << val << endl;
             return val;
             // return true;
         }
 
         Ptr<Packet> DoDequeue() {
-            cout << "---DoDequeue" << endl;
+            // cout << "---DoDequeue" << endl;
             Ptr<const Packet> p = schedule();
-            cout << "DoDequeue - schedule result: " << p << endl;
-            //const_cast<Packet*>(p.Get());
-            if (p == nullptr) {
-                cout << "DoDequeue - schedule result is null" << endl;
-                return nullptr;
-            } else {
+            // cout << "DoDequeue - schedule result: " << p << endl;
+            if (p!=nullptr) {
                 Ptr<Packet> p2 = p->Copy();
                 return p2;
             }
+            return nullptr;
         }
 
-        // doPeek() is called by Peek() and Dequeue()
         Ptr<const Packet> DoPeek() const {
             cout << "---DoPeek" << endl;
-            // Ptr<const Packet> p = schedule();
             Ptr<const Packet> p = const_cast<DiffServ*>(this)->schedule();
-            // Ptr<Packet> p2 = p->Copy();
             return p;
         }
 
@@ -153,15 +148,18 @@ class DiffServ : public ns3::Queue<ns3::Packet> {
         };
 
         int GetHighestPriorityAvailableIndex() const {
-            int highest_priority = 0;
-            int highest_priority_index = -1;
-            if (!q_class[0]->IsEmpty()) {
-                highest_priority_index = 0;
+            int highest_priority = q_class[0]->GetPriorityLevel();
+            int highest_priority_index = 0;
+            if (q_class[0]->IsEmpty()) {
+                // cout << "GetHighestPriorityAvailableIndex - Q0 is not empty" << endl;
+                highest_priority = 0;
+                highest_priority_index = -1;
             }
             for (int i = 1; i < q_class.size(); i++) {
-                if (q_class[i]->GetPriorityLevel() > highest_priority && !q_class[i]->IsEmpty()) {
+                if ((q_class[i]->GetPriorityLevel() >= highest_priority) && !q_class[i]->IsEmpty()) {
                     highest_priority = q_class[i]->GetPriorityLevel();
                     highest_priority_index = i;
+                    // cout << "Changed GetHighestPriorityAvailableIndex - highest_priority_index: " << highest_priority_index << endl;
                 }
             }
             return highest_priority_index;

@@ -33,11 +33,14 @@ class TrafficClass : public Object {
         };
 
         bool Enqueue(Ptr<Packet> p) {
+            cout << "traffic-class.h - Enqueue" << endl;
             if (packets + 1 <= maxPackets) {
+                cout << "traffic-class.h - Enqueue - happens" << endl;
                 packets++;
                 m_queue.push(p);
                 return true;
             }
+            cout << "traffic-class.h - Enqueue - not happening" << endl;
             return false;
         }
 
