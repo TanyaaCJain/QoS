@@ -35,6 +35,10 @@ int main(int argc, char *argv[]) {
     cmd.Parse(argc, argv);
     std::cout << "InputFile: " << inputFile << std::endl;
 
+    // ----------Set up QoS name ----------
+    string queue_name = inputFile.substr(inputFile.find_last_of("/\\") + 1);
+    queue_name = queue_name.substr(0, queue_name.find_last_of("."));
+
     // ----------------Set up logging-------------------
     Time::SetResolution(Time::NS); // set time resolution to nanosecond
     LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO); // enable logging for UDP echo client
@@ -47,11 +51,11 @@ int main(int argc, char *argv[]) {
     // -------------Create links and devices------------
     PointToPointHelper clientToRouter; // link between client and router
     clientToRouter.SetDeviceAttribute("DataRate", StringValue("40Mbps"));
-    clientToRouter.SetChannelAttribute("Delay", StringValue("20ms"));
+    clientToRouter.SetChannelAttribute("Delay", StringValue("10ms"));
 
     PointToPointHelper routerToServer; // link between router and server
     routerToServer.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
-    routerToServer.SetChannelAttribute("Delay", StringValue("20ms"));
+    routerToServer.SetChannelAttribute("Delay", StringValue("10ms"));
 
     NetDeviceContainer clientToRouterDevices; // netdevice for client-router link
     clientToRouterDevices = clientToRouter.Install(nodes.Get(0), nodes.Get(2)); // install link between node 0 and node 2
@@ -93,51 +97,61 @@ int main(int argc, char *argv[]) {
     // Set up the UdpEchoClient applications with different ports
     UdpEchoClientHelper echoClient1 (routerToServerInterfaces.GetAddress(1), 10000);
     echoClient1.SetAttribute ("MaxPackets", UintegerValue(120000));
-    // echoClient1.SetAttribute ("Interval", TimeValue(Seconds(1.0)));
     echoClient1.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
     echoClient1.SetAttribute ("PacketSize", UintegerValue(1024));
 
     UdpEchoClientHelper echoClient2 (routerToServerInterfaces.GetAddress(1), 20000);
     echoClient2.SetAttribute("MaxPackets", UintegerValue(120000));
-    // echoClient2.SetAttribute("Interval", TimeValue(Seconds(1.0)));
     echoClient2.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
     echoClient2.SetAttribute("PacketSize", UintegerValue(1024));
 
-    UdpEchoClientHelper echoClient3 (routerToServerInterfaces.GetAddress(1), 30000);
-    echoClient3.SetAttribute("MaxPackets", UintegerValue(10000));
-    // echoClient3.SetAttribute("Interval", TimeValue(Seconds(1.0)));
-    echoClient3.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
-    echoClient3.SetAttribute("PacketSize", UintegerValue(1024));
+    if (queue_name == "spq") {
+        ApplicationContainer clientApps1 = echoClient1.Install(nodes.Get(0));
+        clientApps1.Start(Seconds(15.0));
+        clientApps1.Stop(Seconds(50.0));
 
-    ApplicationContainer clientApps1 = echoClient1.Install(nodes.Get(0));
-    clientApps1.Start(Seconds(5.0));
-    clientApps1.Stop(Seconds(50.0));
+        ApplicationContainer clientApps2 = echoClient2.Install(nodes.Get(0));
+        clientApps2.Start(Seconds(3.0));
+        clientApps2.Stop(Seconds(50.0));
 
-    ApplicationContainer clientApps2 = echoClient2.Install(nodes.Get(0));
-    clientApps2.Start(Seconds(5.0));
-    clientApps2.Stop(Seconds(50.0));
+        AsciiTraceHelper ascii;
+        clientToRouter.EnablePcap ("plot-spq-1-", clientToRouterDevices.Get(0));
+        routerToServer.EnablePcap ("plot-spq-2-", routerToServerDevices.Get(1));
 
-    ApplicationContainer clientApps3 = echoClient3.Install(nodes.Get(0));
-    clientApps3.Start(Seconds(5.0));
-    clientApps3.Stop(Seconds(50.0));
+    } else if (queue_name == "drr") {
+        UdpEchoClientHelper echoClient3 (routerToServerInterfaces.GetAddress(1), 30000);
+        echoClient3.SetAttribute("MaxPackets", UintegerValue(120000));
+        echoClient3.SetAttribute("Interval", TimeValue(MicroSeconds(100)));
+        echoClient3.SetAttribute("PacketSize", UintegerValue(1024));
 
-    // Enable generating the pcap files
-    // clientToRouter.EnablePcapAll("client-router");
-    // routerToServer.EnablePcapAll("router-server");
+        ApplicationContainer clientApps1 = echoClient1.Install(nodes.Get(0));
+        clientApps1.Start(Seconds(1.0));
+        clientApps1.Stop(Seconds(60.0));
 
-    AsciiTraceHelper ascii;
+        ApplicationContainer clientApps2 = echoClient2.Install(nodes.Get(0));
+        clientApps2.Start(Seconds(1.0));
+        clientApps2.Stop(Seconds(60.0));
 
-    // std::string fileName = "drr-";
-    // clientToRouter.EnablePcapAll (fileName, false);
-    // routerToServer.EnablePcapAll (fileName, false);
+        ApplicationContainer clientApps3 = echoClient3.Install(nodes.Get(0));
+        clientApps3.Start(Seconds(1.0));
+        clientApps3.Stop(Seconds(60.0));
 
-    std::string fileName = "drr-";
-    clientToRouter.EnablePcap ("cc-drr-1", clientToRouterDevices.Get(0));
-    routerToServer.EnablePcap ("cc-drr-2", routerToServerDevices.Get(1));
+        AsciiTraceHelper ascii;
+        clientToRouter.EnablePcap ("plot-drr-1-", clientToRouterDevices.Get(0));
+        routerToServer.EnablePcap ("plot-drr-2-", routerToServerDevices.Get(1));
+    } else if (queue_name == "simple") {
+        ApplicationContainer clientApps1 = echoClient1.Install(nodes.Get(0));
+        clientApps1.Start(Seconds(3.0));
+        clientApps1.Stop(Seconds(50.0));
 
-    // std::string fileName = "spq-";
-    // clientToRouter.EnablePcap ("cc-spq-1", clientToRouterDevices.Get(0));
-    // routerToServer.EnablePcap ("cc-spq-2", routerToServerDevices.Get(1));
+        ApplicationContainer clientApps2 = echoClient2.Install(nodes.Get(0));
+        clientApps2.Start(Seconds(3.0));
+        clientApps2.Stop(Seconds(50.0));
+
+        AsciiTraceHelper ascii;
+        clientToRouter.EnablePcap ("plot-simple-1-", clientToRouterDevices.Get(0));
+        routerToServer.EnablePcap ("plot-simple-2-", routerToServerDevices.Get(1));
+    }
 
     Simulator::Run();
     Simulator::Destroy();

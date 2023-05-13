@@ -21,7 +21,6 @@ public:
     }
 
     void SetUp() {
-        cout << "SetUp" << endl;
         // Set up Deficit Counter
         for (size_t i = 0; i < q_class.size(); i++) {
             deficit_counter.push_back(0);
@@ -61,23 +60,15 @@ protected:
         UdpHeader udpHeader;
         copy->PeekHeader(udpHeader);
         uint32_t destPort = udpHeader.GetDestinationPort();
-        cout << "Destination Port: " << destPort << endl;
-
-        cout << "Packet Size: " << p->GetSize() << endl;
 
         int index = GetDefaultIndex();
         for (size_t i = 0; i < q_class.size(); i++) {
-            cout << "Packet classified to Q" << i << endl;
-            // if (q_class[i]->GetMaxPackets()) {
-            //     cout << "Q" << i << " is empty" << endl;
-            //     continue;
-            // }
-            // divide i by 3 and get the remainder
-            // return i % 3;
             if (q_class[i]->match(p)) {
+                cout << "---Classify - index: " << i << endl;
                 return i;
             }
         }
+        cout << "---Classify - index: " << index << endl;
         return index;
     }
 
@@ -85,29 +76,16 @@ protected:
     Ptr<const Packet> schedule() override {
         cout << "---schedule" << endl;
         while (true) {
-            printf("Schedule - next_queue_index: %d, q_class[next_queue_index]: %p, q_class[next_queue_index]->IsEmpty(): %d\n", next_queue_index, q_class[next_queue_index], q_class[next_queue_index]->IsEmpty());
             if (AreAllQueuesEmpty()) {
-                cout << "Schedule - all queues are empty" << endl;
                 return nullptr;
             }
             if (!q_class[next_queue_index]->IsEmpty()) {
-                cout << "Schedule - Q" << next_queue_index << " is not empty, return the first packet in Q" << next_queue_index << endl;
-                cout << "Weight: " << q_class[next_queue_index]->GetWeight() << endl;
-                // add weight to deficit_counter
-                cout << "Schedule - deficit_counter[" << next_queue_index << "]: " << deficit_counter[next_queue_index] << endl;
                 deficit_counter[next_queue_index] += q_class[next_queue_index]->GetWeight();
-                cout << "Schedule - deficit_counter[" << next_queue_index << "]: " << deficit_counter[next_queue_index] << endl;
                 while (deficit_counter[next_queue_index] > 0 && !q_class[next_queue_index]->IsEmpty()) {
-                    Ptr<Packet> p = q_class[next_queue_index]->Peek(); //peek
+                    Ptr<Packet> p = q_class[next_queue_index]->Peek();
                     uint32_t packet_size = p->GetSize();
                     if (deficit_counter[next_queue_index] >= packet_size) {
-                        cout << "DoDequeue - deficit_counter is greater than packet size, packet is dequeued from Q" << next_queue_index << endl;
-                        // Ptr<Packet> p = q_class[next_queue_index]->Dequeue();
-                        // p = schedule();
-
                         deficit_counter[next_queue_index] -= packet_size;
-                        // SubtractDeficitCounter(next_queue_index, packet_size);
-                        // return q_class[next_queue_index]->Peek();
                         return q_class[next_queue_index]->Dequeue();
                     } else {
                         break;
@@ -123,14 +101,6 @@ protected:
             }
         }
     }
-
-    // void AddDeficitCounter(int index, int value) {
-    //     deficit_counter[index] = value;
-    // }
-
-    // void SubtractDeficitCounter(int index, int value) {
-    //     deficit_counter[index] -= value;
-    // }
 };
 
 #endif /* DRR_H */

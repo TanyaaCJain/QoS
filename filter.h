@@ -123,7 +123,7 @@ class Source_Mask : public FilterElements {
 
         return (ipv4Header.GetDestination().CombineMask(mask) == address.CombineMask(mask));
     }
-            
+
 };
 
 class Destination_IP_Address : public FilterElements {
@@ -141,7 +141,6 @@ class Destination_IP_Address : public FilterElements {
             copy->RemoveHeader(ipv4Header);
 
             Ipv4Address destIp = ipv4Header.GetDestination();
-            cout << "Filter: Destination_IP_Address, Destination IP: " << destIp << endl;
 
             if (value == destIp) {
                 return true;
@@ -175,14 +174,8 @@ class Destination_Port_Number : public FilterElements {
             UdpHeader udpHeader;
             copy->PeekHeader(udpHeader);
             uint32_t destPort = udpHeader.GetDestinationPort();
-            // cout << "Filter: Destination_Port_Number" << endl;
-
-            cout << "\t\tPacket's Destination Port: " << destPort << ", Object's Destination Port: " << value << endl;
-
-            cout << "\t\tBoolean value is " << ((value == destPort) ? "true" : "false") << endl;
-
             return value == destPort;
-        
+
         }
 
         void set (uint16_t port) {
@@ -228,7 +221,6 @@ class Protocol_Number : public FilterElements {
             copy->RemoveHeader(ipv4Header);
 
             uint32_t protocol = ipv4Header.GetProtocol();
-            cout << "Filter: Protocol Number, Protocol: " << protocol << endl;
 
             if (value == protocol) {
                 return true;
@@ -240,6 +232,5 @@ class Protocol_Number : public FilterElements {
             value = protocol;
         }
 };
-// } // namespace ns3
 
 #endif /* FILTER_H */

@@ -47,28 +47,24 @@ protected:
 
         UdpHeader udpHeader;
         copy->PeekHeader(udpHeader);
-        // uint32_t destPort = udpHeader.GetDestinationPort();
-        // cout << "~~~Classify - Destination Port: " << destPort << endl;
 
         int index = GetDefaultIndex();
         for (size_t i = 0; i < q_class.size(); i++) {
-            // cout<<"\tInside the for loop for q_class = " << i << endl;
             if (q_class[i]->match(p)) {
+                cout << "---Classify - index: " << i << endl;
                 return i;
             }
         }
+        cout << "---Classify - index: " << index << endl;
         return index;
     }
 
     // --------Schedule---------
     Ptr<const Packet> schedule() override {
         int highest_priority_index = GetHighestPriorityAvailableIndex();
-        // cout << "~~~Schedule - highest_priority_index: " << highest_priority_index << endl;
         if (highest_priority_index == -1) {
-            // cout << "Schedule - all queues are empty" << endl;
             return nullptr;
         }
-        // cout << "Schedule - Q" << highest_priority_index << " is not empty, return the first packet in Q" << highest_priority_index << endl;
         Ptr<Packet> p = q_class[highest_priority_index]->Dequeue();
         return p;
     }
